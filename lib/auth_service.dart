@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService extends ChangeNotifier {
+  User? get user => FirebaseAuth.instance.currentUser;
+
   User? currentUser() {
     return FirebaseAuth.instance.currentUser;
   }
@@ -75,8 +77,8 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  void signOut() async {
+  Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
-    notifyListeners();
+    notifyListeners(); // ⭐ 필수
   }
 }
