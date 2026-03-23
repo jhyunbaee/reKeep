@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:rekeep/home.dart';
-import 'package:rekeep/login.dart';
 import 'auth_service.dart';
 
 void main() async {
