@@ -28,6 +28,7 @@ class _LoginPageState extends State<LoginPage> {
             color: AppColors.primary,
           ),
         ),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

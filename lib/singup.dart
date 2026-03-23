@@ -12,6 +12,7 @@ class SignupPage extends StatefulWidget {
 
 class _SignupPageState extends State<SignupPage> {
   final nameController = TextEditingController();
+  final nicknameController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -19,6 +20,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   void dispose() {
     nameController.dispose();
+    nicknameController.dispose();
     phoneController.dispose();
     emailController.dispose();
     passwordController.dispose();
@@ -58,6 +60,71 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+
+              const Text(
+                "닉네임",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 5),
+              Row(
+                children: [
+                  // 🔹 닉네임 텍스트필드
+                  Expanded(
+                    child: SizedBox(
+                      child: TextField(
+                        controller: nicknameController,
+                        decoration: InputDecoration(
+                          hintText: "닉네임",
+                          filled: true,
+                          fillColor: AppColors.fieldColor,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: const TextStyle(color: Color(0xFF333333)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+
+                  // 🔹 중복확인 버튼
+                  SizedBox(
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                      ),
+                      onPressed: () async {
+                        final nickname = nicknameController.text.trim();
+                        if (nickname.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("닉네임을 입력해주세요.")),
+                          );
+                          return;
+                        }
+
+                        final exists = await checkNicknameDuplicate(nickname);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              exists ? "이미 사용 중인 닉네임입니다." : "사용 가능한 닉네임입니다.",
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text("중복확인"),
+                    ),
+                  ),
+                ],
+              ),
+
               const SizedBox(height: 20),
 
               const Text(
@@ -143,6 +210,7 @@ class _SignupPageState extends State<SignupPage> {
                       email: emailController.text,
                       password: passwordController.text,
                       name: nameController.text,
+                      nickname: nicknameController.text,
                       phone: phoneController.text,
                       onSuccess: () {
                         ScaffoldMessenger.of(context).showSnackBar(
