@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rekeep/bottom_menu_bar.dart';
+import 'package:rekeep/asset.dart';
+import 'package:rekeep/analysis.dart';
 import 'package:rekeep/setting.dart';
+import 'package:rekeep/widgets/custom_app_bar.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:rekeep/constants/colors.dart';
 
@@ -46,11 +49,12 @@ class _HomePageState extends State<HomePage> {
 
   // 앱바
   final List<Widget> _pages = [
-    const Center(child: Text("홈")),
-    const Center(child: Text("자산")),
-    const Center(child: Text("분석")),
+    const SizedBox(), // 홈은 따로 body에서 처리중이라 비워둠
+    const Asset(),
+    const Analysis(),
     const Setting(),
   ];
+
   String _getAppBarTitle() {
     switch (_selectedIndex) {
       case 1:
@@ -111,11 +115,12 @@ class _HomePageState extends State<HomePage> {
     final noSpendDays = getNoSpendDays();
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
-        title: _selectedIndex == 0
-            ? Row(
+      appBar: _selectedIndex == 0
+          ? AppBar(
+              backgroundColor: Colors.white,
+              elevation: 1,
+              centerTitle: true,
+              title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
@@ -154,38 +159,132 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                 ],
-              )
-            : Text(
-                _getAppBarTitle(),
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
               ),
-      ),
+            )
+          : customAppBar(context: context, title: _getAppBarTitle()),
 
       floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
 
       body: _selectedIndex == 0
-          ? Column(
-              children: [
-                /// 합계
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
+          ? SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  /// 합계
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 1; // 자산 페이지
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 0),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            /// 수입 / 지출
+                            Row(
+                              children: [
+                                /// 수입
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                        "수입",
+                                        style: TextStyle(
+                                          color: AppColors.secondary,
+                                        ),
+                                      ),
+                                      Text(
+                                        "${formatMoney(monthlyTotal["income"]!)}원",
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(width: 20),
+
+                                /// 지출
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                        "지출",
+                                        style: TextStyle(
+                                          color: AppColors.secondary,
+                                        ),
+                                      ),
+                                      Text(
+                                        "${formatMoney(monthlyTotal["expense"]!)}원",
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.pointColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            /// 합계
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "현 자산",
+                                  style: TextStyle(color: AppColors.secondary),
+                                ),
+                                Text(
+                                  "${formatMoney(monthlyTotal["total"]!)}원",
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 1; // 자산 페이지
-                      });
-                    },
+
+                  /// 무지출 카드
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: const Color(0xFFF5F7FF),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
@@ -195,129 +294,30 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      child: Column(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          /// 수입 / 지출
-                          Row(
-                            children: [
-                              /// 수입
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      "수입",
-                                      style: TextStyle(
-                                        color: AppColors.secondary,
-                                      ),
-                                    ),
-                                    Text(
-                                      "${formatMoney(monthlyTotal["income"]!)}원",
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              const SizedBox(width: 20),
-
-                              /// 지출
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      "지출",
-                                      style: TextStyle(
-                                        color: AppColors.secondary,
-                                      ),
-                                    ),
-                                    Text(
-                                      "${formatMoney(monthlyTotal["expense"]!)}원",
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.pointColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          const Text(
+                            "무지출",
+                            style: TextStyle(color: AppColors.secondary),
                           ),
-
-                          const SizedBox(height: 10),
-
-                          /// 합계
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                "현 자산",
-                                style: TextStyle(color: AppColors.secondary),
-                              ),
-                              Text(
-                                "${formatMoney(monthlyTotal["total"]!)}원",
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            "총 $noSpendDays일",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ),
 
-                /// 무지출 카드
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F7FF),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 0),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "무지출",
-                          style: TextStyle(color: AppColors.secondary),
-                        ),
-                        Text(
-                          "총 $noSpendDays일",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                  const SizedBox(height: 10),
 
-                const SizedBox(height: 10),
-
-                /// 캘린더
-                Expanded(
-                  child: Padding(
+                  /// 캘린더
+                  Padding(
                     padding: const EdgeInsets.only(top: 10.0),
                     child: TableCalendar(
                       locale: 'ko_KR',
@@ -342,6 +342,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                       headerVisible: false,
                       daysOfWeekHeight: 40,
+
+                      availableGestures: AvailableGestures.none,
 
                       onDaySelected: (selectedDay, focusedDay) {
                         setState(() {
@@ -420,8 +422,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             )
           : _pages[_selectedIndex],
 
