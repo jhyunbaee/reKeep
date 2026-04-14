@@ -6,17 +6,14 @@ import 'auth_service.dart';
 import 'package:rekeep/login.dart';
 import 'package:rekeep/setting_profile.dart';
 
-class Setting extends StatelessWidget {
+class Setting extends StatefulWidget {
   const Setting({super.key});
 
-  Future<Map<String, dynamic>?> getUserData(String uid) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .get();
-    return doc.data();
-  }
+  @override
+  State<Setting> createState() => _SettingState();
+}
 
+class _SettingState extends State<Setting> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
@@ -32,7 +29,7 @@ class Setting extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
-          .snapshots(), // 실시간 구독
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -44,7 +41,6 @@ class Setting extends StatelessWidget {
 
         return ListView(
           children: [
-            /// 프로필 영역
             GestureDetector(
               onTap: () {
                 Navigator.push(
