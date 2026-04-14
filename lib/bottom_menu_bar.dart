@@ -52,6 +52,7 @@ class BottomMenuBar extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 12,
+              fontWeight: FontWeight.bold,
               color: isSelected ? AppColors.primary : AppColors.secondary,
             ),
           ),
